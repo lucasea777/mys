@@ -187,3 +187,61 @@ def ej5(ns=10000):
         lambda M: ((sum(M)/len(M))/8,), 
         lambda k, p: binom.pmf(k, n=8, p=p), len(M), 9, 1, ns=ns)
 
+def pval_cont_sim_pd(M, estimar_parametros, F, randvar, ns):
+        print('M orig: m:{0}, v:{1}'.format(lib.media(M), lib.varianza(M)))
+        M.sort()
+        k = len(M)
+        def est_d(l):
+            def elem():
+                for i, e in enumerate(l):
+                    yield (i + 1)/k - e
+                    yield e - i/k
+            return max(elem())
+        pest = estimar_parametros(M)
+        d = est_d([F(y, *pest) for y in M])
+        print("d: {0}, pest: {1}".format(d, pest))
+        #return sum(est_d(sorted(random() for _ in range(k))) >= d for _ in range(ns))/ns
+        def generar_M_y_Estimar_d():
+            M = sorted(randvar(*pest) for _ in range(k))
+            #print('M gen: m:{0}, v:{1}'.format(lib.media(M), lib.varianza(M)))
+            pest_sim = estimar_parametros(M)
+            return est_d([F(y, *pest_sim) for y in M])
+        #return generar_M_y_Estimar_d()
+        return sum(generar_M_y_Estimar_d() >= d for _ in range(ns))/ns
+
+
+def ej7(ns=100000):
+    M = [1.6,10.3,3.5,13.5,18.4,7.7,24.3,10.7,8.4,4.9,7.9,12,16.2,6.8,14.7]
+    return pval_cont_sim_pd(M,
+        lambda M: (1/lib.media(M),),
+        lambda x, p: 1 - exp(-x*p), 
+        lambda lam: lib.exponencial(lam), ns)
+
+def ej8(ns=100000):
+    M = [91.9, 97.8, 111.4, 122.3, 105.4, 95.0, 103.8, 99.6, 96.6, 119.3, 104.8, 101.7]
+    uest = lib.media(M)
+    vest = lib.varianza(M)
+    sest = sqrt(vest)
+    M = [(m - uest)/sest for m in M]
+    return KS(lambda x: norm(0, 1).cdf(x), M, ns=ns)
+    #return pval_cont_sim_pd(M,
+    #    lambda M: (lib.media(M), lib.varianza(M, adjusted=False)),
+    #    lambda x, u, v: norm(u, v).cdf(x), 
+    #    lambda u, v: norm.rvs(u, v), ns)
+
+def rangos(n, m, r):
+    if n == 1 and m == 0:
+        if r <= 0: 
+            return 0
+        else:
+            return 1
+    elif n == 0 and m == 1:
+        if r < 0: return 0
+        else: return 1
+    else:
+        if n == 0:
+            return rangos(0, m - 1, r)
+        elif m == 0:
+            return rangos(n - 1, 0, r-n)
+        else:
+            return n/(n+m)*rangos(n-1,m,r-n-m)+m/(n+m)*rangos(n,m-1,r)

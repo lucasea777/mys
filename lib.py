@@ -40,11 +40,11 @@ def media(list):
 def ds(data):
     return sqrt(varianza(data))
 
-def varianza(data):
+def varianza(data, adjusted=True):
     """Return sum of square deviations of sequence data.
     """
     c = media(data)
-    return sum((x-c)**2 for x in data)/(len(data) - 1)
+    return sum((x-c)**2 for x in data)/(len(data) - adjusted)
 
 def Poisson(l, U=None):
         U = random() if U is None else U
