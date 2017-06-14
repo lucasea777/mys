@@ -16,9 +16,9 @@ def _____discretizacion(F, N, a, b, nint=1000): #TODO
     #return Np
     
 
-def estadisticoT(p, N):
+def estadisticoT(p, N, n=None):
     assert(len(p) == len(N) != 0)
-    n = sum(N)
+    n = sum(N) if n == None else n
     assert(n != 0)
     k = len(p)
     T = 1/n * sum((N[i] - n*p[i])**2/p[i] for i in range(k))
@@ -131,14 +131,59 @@ def ejemplo2_3():
     total_acc = 6*0 + 2*1 + 1*2 + 9*3 + 7*4 + 4*5 + 1*8 = 87
     total_dias = 30
     """
-    lamb = 87/30
+    n = 30
+    lamb = 87/n
     g = lib.poissonseriesgen(lamb)
     P = [next(g) for _ in range(5)]
     N = [6, 2, 1, 9, 7, 5] 
     #p= [P(0), P(1), P(2), P(3), P(4), P(X>=5)]
-    # P(X>=5) = 
+    # P(X>=5) = 1 - P(X <= 4) 
     p = [P[0], P[1], P[2] ,P[3] ,P[4], 1 - sum(P[:5])]
     t, pval_chi = pval_disc(p, N, param_desc=1)
     print("t: {0}".format(t))
     print("chi-test pval: {0}".format(pval_chi))
-    
+    M = [lib.Poisson(lamb) for _ in range(n)]
+    def genNp():
+        k = 6
+        d = dict(Counter(M))
+        Np = [0] * k
+        for i in d.keys():
+            Np[i] = d[i]
+        return Np
+    lamb = sum(M)/30
+    g = lib.poissonseriesgen(lamb)
+    P = [next(g) for _ in range(5)]
+    p = [P[0], P[1], P[2] ,P[3] ,P[4], 1 - sum(P[:5])]
+    print(p)
+    print(genNp())
+    t = estadisticoT(p, genNp())
+    print("t: {0}".format(t))
+
+
+def pval_disc_sim_pd(M, randvar, estimar_parametros, f, n, sizimg, param_desc, ns=10):
+        def estadisticoTdeM(M):
+            pest = estimar_parametros(M)
+            d = dict(Counter(M))
+            N = [0] * sizimg
+            for i in d.keys():
+                N[i] = d[i]
+            p = [f(k, *pest) for k in range(sizimg)]
+            return estadisticoT(p, N, n=n), pest
+        
+        k = len(M)
+        t, pest = estadisticoTdeM(M)
+        print("t: {0}".format(t))
+        print("chi-test: {0}".format(1 - chi2.cdf(t, df=k - 1 - param_desc)))
+        def genEst(k):
+            M = [randvar(pest) for _ in range(k)]
+            #M = binom.rvs(8, pest, size=k)
+            return estadisticoTdeM(M)[0]
+        return sum(genEst(k) >= t for _ in range(ns))/ns
+
+
+def ej5(ns=10000):
+    M = [6,7,3,4,7,3,7,2,6,3,7,8,2,1,3,5,8,7]
+    return pval_disc_sim_pd(M, lambda p: binom.rvs(n=8, p=p),
+        lambda M: ((sum(M)/len(M))/8,), 
+        lambda k, p: binom.pmf(k, n=8, p=p), len(M), 9, 1, ns=ns)
+
