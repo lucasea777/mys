@@ -9,6 +9,18 @@ from collections import Counter
 """
 alpha = 1 - confianza/100
 pval <= alpha => Rechazar
+
+geom
+p(k) = p*q**k   u=1/p   v=(1-p)/p**2
+
+poisson
+p(x=i) = exp(-lamb)*lamb**i/i!    i>=0      u=v=lamb
+
+MLE
+L(par) = prod_i=1^n p_par(Xi)
+
+uniforme
+f(x) = 1/(b-a)  u=(a+b)/2   v=(b-a)**2/2
 """
 
 def determinar(pval=None, confianza=None):
@@ -306,6 +318,10 @@ def ej8(ns=100000):
     #    lambda x, u, v: norm(u, v).cdf(x), 
     #    lambda u, v: norm.rvs(u, v), ns)
 
+
+def rango(x, nm_list):
+    return sum(nm_list.index(k) + 1 for k in x)
+
 def rangos(n, m, r):
     if n == 1 and m == 0:
         if r <= 0: 
@@ -323,7 +339,49 @@ def rangos(n, m, r):
         else:
             return n/(n+m)*rangos(n-1,m,r-n-m)+m/(n+m)*rangos(n,m-1,r)
 
+def valor_p(n, m, r):
+    return 2 * min([rangos(n, m, r), 1 - rangos(n, m, r - 1)])
 
-def ej9():
+def by_simulation(x, y):
+    n = len(x)
+    m = len(y)
+    return sum(int((n+m)*random()) + 1 for j in range(n))
+
+def ej9(ns=100000):
     x = [65.2, 67.1, 69.4, 78.4, 74, 80.3]
     y = [59.4, 72.1, 68, 66.2, 58.5]
+    n = len(x)
+    m = len(y)
+    xy = sorted(x + y)
+    r = rango(x, xy)
+    pval = valor_p(n, m, r)
+    print("pval exacto: \t{0}".format(pval))
+    pvalsim = sum(by_simulation(x, y) > r for _ in range(ns))/ns
+    print("pval simulacion: \t{0}".format(pvalsim))
+
+def test_pval(pvalcreator, confianza, ns=1000):
+    """
+    pvalcreator: pvalores done la hipotesis nula es siempre cierta,
+        es decir los datos tienen distr F.
+    """
+    def rechaze():
+        return determinar(pval=pvalcreator(), confianza=confianza) == "Wacale!"
+    prob_rech = sum(rechaze() for _ in range(ns))/ns
+    print("si los pvalores provienen siempre de muestras de la distr H0, entonces")
+    print("el porcentaje de rechazo {0} debe ser cercano a ".format(prob_rech*100))
+    print("100 - confianza que vale {0}".format(100-confianza))
+
+def test_ej1a(ns=10000):
+    p = [1/4, 1/2, 1/4] 
+    def gen():
+        N = [0]*3
+        for i in range(564):
+            i = lib.discretaX([0,1,2], p)
+            N[i] += 1
+        return N
+    def pvalcreator():
+        N = gen()
+        t, pval = pval_disc(p, N, param_desc=0)
+        return pval
+    test_pval(pvalcreator, 75, ns=ns)
+
