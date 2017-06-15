@@ -7,6 +7,20 @@ from scipy.stats import norm
 #mcarlo = lambda g,n: sum(g(random()) for _ in range(n))/n
 
 def ej1(d=0.1):
+    """
+    genrar n valores de una variable aleatoria normal estandar
+    de manera que cumpla: n>=30 y s/sqrt(n) < .1
+    Notese que V(medmuestr) = V(X)/n => S(medmuestr) = sqrt(V(X)/n)
+    Numero esperado de vatos que deben generarse:
+    S/sqrt(n) < .1
+    S**2/n < .01
+    S**2/.01 < n
+    E(S**2/.01) < E(n)
+    E(S**2)/.01 < E(n)
+    V(x)/.01 < E(n)       # pues S**2 es un estimador insesgado => E(S**2) = V
+    1/.01 < E(n)
+    E(n) > 100
+    """
     def gen():
         while True:
             yield lib.normal()
@@ -16,6 +30,11 @@ def ej1(d=0.1):
             return n, m, sqrt(V/n)
 
 def ej2(d=.01):
+    """
+    Estimar: integ 0 1 exp(x**2)
+    y detenerse cuando la DE del estimador sea menor que .01
+    S(medmuest) = S/sqrt(n) = sqrt(V/n)
+    """
     def gen():
         while True:
             yield exp(random()**2)
@@ -26,6 +45,9 @@ def ej2(d=.01):
 
 def ej3(confianza=95, n=1000):
     """
+    N = Min{n: (sum from i to n Ui) > 1}
+    E(N) = e
+
     l = (g6.ej3(n=1000, confianza=90) for _ in range(1000))
     sum(j[0]+j[1] <= e <= j[0]-j[1] for j in l)/1000*100
     89.9
@@ -52,6 +74,10 @@ def ej3(confianza=95, n=1000):
     return X, z * SNb
 
 def ej4(n=1000, confianza=95):
+    """
+    M  = {n: U1 <= U2 <= ... <= Un-1 > Un}
+    E[M] = e
+    """
     # sum(j[0]+j[1] <= e <= j[0]-j[1] for j in (g6.ej4(n=1000, confianza=98) for _ in range(1000)))/1000*100
     # 98
     def primermenor():
@@ -66,6 +92,9 @@ def ej4(n=1000, confianza=95):
     return lib.intdeconfXb(primermenor, n, confianza)
     
 def ej5(l=0.1, confianza=95):
+    """
+    ancho menor a l
+    """
     # sum(j[0]+j[1] <= pi <= j[0]-j[1] for j in (ej5(l=0.1, confianza=82) for _ in range(1000)))/1000*100
     # 82
     def isInside():
@@ -80,6 +109,10 @@ def ej5(l=0.1, confianza=95):
 
 
 def ej6(N=1000, a=-5, b=5):
+    """
+    p = P(a < sum_i=1^n Xi/n - u < b)
+    Estimar p con bootstrap
+    """
     Xi = [56, 101, 78, 67, 93, 87, 64, 72, 80, 69]
     n = len(Xi)
     xb = sum(Xi)/n

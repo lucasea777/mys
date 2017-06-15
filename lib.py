@@ -205,6 +205,8 @@ def media_var(data_gen):
 
 def intdeconfXb(RANDVAR, n, confianza, show=False):
         """
+        μ ∊ X̄ ± Ƶ_α/2 * S/√n
+
         n: tamaño muestra
         confianza: en %
         """
@@ -213,12 +215,12 @@ def intdeconfXb(RANDVAR, n, confianza, show=False):
         # SNb = sqrt(V/n) # V(N̄) = V(N)/n ^ S(N̄) = √V(N̄) => S(N̄) = √(V(N)/n)
         for X, VN, _ in lib.media_var((RANDVAR() for _ in range(n))):
             pass
-        VNb = VN/n # V(N̄)
-        SNb = sqrt(VNb) # S(N̄)
+        VNb = VN/n                   # V(N̄) = V(N)/n
+        SNb = sqrt(VNb)              # S(N̄) = √(V(N)/n) = S/√n
         alpha = 1 - confianza/100
         z = norm.ppf(alpha/2)
         if show:
-            print("X̄ ∊ {0} ± {1} con {2}% de confianza".format(X, z * SNb, confianza))
+            print("μ ∊ {0} ± {1} con {2}% de confianza".format(X, z * SNb, confianza))
             print("V(N̄) = {0}".format(VNb))
         return X, z * SNb, VNb
 
