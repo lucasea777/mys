@@ -385,3 +385,91 @@ def test_ej1a(ns=100):
         t, pval = pval_disc_sim_binom(p, N, ns=1000)
         return pval
     test_pval(pvalcreator, 75, ns=ns)
+
+def pej1(ns=10000):
+    """
+    los sig datos corresponden a una X ~ binomial(n=4,p=nose)
+    media(X) = np => p = media(X)/n
+    """
+    #M = [6,7,3,4,7,3,7,2,6,3,7,8,2,1,3,5,8,7]
+    M = [1,1,0,0,4,0,1,3,0,1,2,1,1,0,1,1,0,2,1,1]
+    return pval_disc_sim_pd(M, lambda p: binom.rvs(n=4, p=p),
+        lambda M: (lib.media(M)/4,),
+        lambda k, p: binom.pmf(k, n=4, p=p), 5, 1, ns=ns)
+
+def _pej1():
+    """
+    Determinar si N ~ Bin(7, .5)
+    """
+    M = [1,1,0,0,4,0,1,3,0,1,2,1,1,0,1,1,0,2,1,1]
+    d = dict(Counter(M))
+    Np = [0] * 5
+    for i in d.keys():
+        Np[i] = d[i]
+    print(Np)
+    assert(Np == [6, 10, 2, 1, 1])
+    p = [binom.pmf(k, n=4, p=lib.media(M)/4) for k in range(5)]
+    T, pval = pval_disc(p, Np)
+    return T, pval
+
+def pej3():
+    """
+    los datos son exponenciales con media 1/11 => lamb = 11
+    f(x) = 11*exp(-11*x)
+    F(x) = int_0^x f(x) = 1 - exp(-11*x)
+    """
+    return KS(lambda x: 1 - exp(-11*x), 
+        [.06, .02, .18, .17, .08, .13, .22, .07, .12, .21, .03], ns=500)
+
+def valor_p_distribucion_R(n, m, r):
+    N = n + m
+    rr = (r - (n * (N + 1)) / 2.0) / (sqrt((n * m * (N + 1)) / 12.0))
+    if r <= n * (N + 1) / 2.0:
+        return 2 * norm.cdf(rr)
+    else:
+        return 2 * (1 - norm.cdf(rr))
+
+def pej4(ns=10000):
+    x = [141, 132, 154, 142, 143, 150, 134, 140]
+    y = [133, 138, 136, 125, 135, 130, 127, 131, 116, 128]
+    n = len(x)
+    m = len(y)
+    xy = sorted(x + y)
+    r = rango(x, xy)
+    pval = valor_p(n, m, r)
+    print("pval exacto: \t{0}".format(pval))
+    pvalsim = sum(by_simulation(x, y) > r for _ in range(ns))/ns
+    print("pval simulacion: \t{0}".format(pvalsim))
+    print("pval, aproximacion normal: \t{0}".format(valor_p_distribucion_R(n, m, r)))
+
+def pej2b(d=.001):
+    """
+    
+    """
+    def chi2_():
+        return 9*lib.varianza([lib.normal() for _ in range(9)])
+    def gen():
+        while True:
+            #yield 0 < chi2_() < 5
+            yield 0 < chi2.rvs(df=9) < 5
+
+    def ej2b():
+        for n, (m, V, _) in enumerate(lib.media_var(gen()), 1):
+            if n >= 30 and sqrt(V/n) < d:
+                return n, m, sqrt(V/n)
+    
+    n, m, s = ej2b()
+    print("p = {0}".format(m))
+
+'''def pej2c(N=10000):
+    """
+    p = P(a < sum_i=1^n Xi/n - u < b)
+    p = P(0 < chi2 < 5)
+    Estimar p con bootstrap
+    """
+    Xi = [6.422, 7.968, 2.287, ...]
+    n = len(Xi)
+    xb = sum(Xi)/n
+    def Y():
+        return choice(Xi)
+    return sum(a + xb < Y() < b + xb for _ in range(N))/N'''

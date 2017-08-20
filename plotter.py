@@ -227,3 +227,15 @@ def compare_disc(fd, va, params, N, a, b, show=True):
 #ax.set_xticks(survived_df.index+0.4)  # set the x ticks to be at the middle of each bar since the width of each bar is 0.8
 #ax.set_xticklabels(survived_df.Groups)  #replace the name of the x ticks with your Groups name
 #plt.show()
+
+def p3ej1():
+    from scipy.stats import binom
+    M = [1,1,0,0,4,0,1,3,0,1,2,1,1,0,1,1,0,2,1,1]
+    p = lib.media(M)/4
+    M = binom.rvs(n=4, p=p, size=len(M)).tolist()
+    N = [M.count(i) for i in range(5)]
+    #compare_disc(lambda x: binom.pmf(x, n=4, p=p), lambda: next(g), (), 5, 0, 4)
+    print(N)
+    plt.plot(range(5), [n/len(M) for n in N])
+    plt.plot(range(5), [binom.pmf(x, n=4, p=p) for x in range(5)])
+    plt.show()
