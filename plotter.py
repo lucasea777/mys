@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 from math import factorial, e , exp, log, sqrt, pi
 from random import random
 from sympy import solve, symbols, simplify, Eq, Integral, Piecewise, pi, E, stats
-from sympy import pprint, oo, init_printing, mpmath
+from sympy import pprint, oo, init_printing
+import mpmath
 x, y = symbols("x y")
 
 import g4, g5, g6, lib
@@ -26,9 +27,9 @@ def ej4PDF(x):
     else:
         return 0
 
-import alonso_lucas
+import parcial2
 def parej4():
-    compare_cont(ej4PDF, alonso_lucas.ej4, (), 100000, 0, 2, 50)
+    compare_cont(ej4PDF, parcial2.ej4, (), 100000, 0, 2, 50)
 
 
 def gammaPDF(x, a=3, b=2):
