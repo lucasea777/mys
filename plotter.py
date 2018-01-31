@@ -12,6 +12,7 @@ from sympy import pprint, oo, init_printing
 import mpmath
 import matplotlib
 matplotlib.interactive(True)
+#matplotlib.use('Agg')
 x, y = symbols("x y")
 
 import g4, g5, g6, lib
