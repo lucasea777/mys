@@ -369,7 +369,7 @@ def test_pval(pvalcreator, confianza, ns=1000):
     prob_rech = sum(rechaze() for _ in range(ns))/ns
     print("si los pvalores provienen siempre de muestras de la distr H0, entonces")
     print("el porcentaje de rechazo {0} debe ser cercano a ".format(prob_rech*100))
-    print("100 - confianza que vale {0}".format(100-confianza))
+    print("(100 - confianza) que vale {0}".format(100-confianza))
 
 def test_ej1a(ns=100):
     p = [1/4, 1/2, 1/4] 
