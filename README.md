@@ -9,11 +9,7 @@ $ docker build -t mys .
 
 $ xhost +local:
 
-$ docker run -it --rm --name mys \
- --volume "$PWD":/usr/src/app  \ 
- --volume="/tmp/.X11-unix:/tmp/.X11-unix" \ 
- --env="QT_X11_NO_MITSHM=1" -e DISPLAY=$DISPLAY \ 
- ipython3 -i plotter.py
+$ docker run -it --rm --name mys --volume "$PWD":/usr/src/app  --volume="/tmp/.X11-unix:/tmp/.X11-unix" --env="QT_X11_NO_MITSHM=1" -e DISPLAY=$DISPLAY mys ipython3 -i plotter.py
 
  $ xhost -local:
 ```
